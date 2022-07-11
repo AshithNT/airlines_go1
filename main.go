@@ -49,8 +49,8 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome to the HomePage!")
 	fmt.Println("Endpoint Hit: homePage")
 }
-func returnAllArticles(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Endpoint Hit: returnAllArticles")
+func returnAll(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint Hit: returnAll")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	jsonFile, err := os.Open("users.json")
@@ -86,13 +86,13 @@ func returnAllArticles(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(json_data)
 }
 func main() {
-
 	http.HandleFunc("/", homePage)
-	http.HandleFunc("/articles", returnAllArticles)
+	http.HandleFunc("/api", returnAll)
 	http.HandleFunc("/code", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		jsonFile, err := os.Open("users.json")
+		filename := r.URL.Query().Get("filename")
+		jsonFile, err := os.Open(string(filename))
 		// if we os.Open returns an error then handle it
 		if err != nil {
 			fmt.Println(err)
@@ -117,14 +117,13 @@ func main() {
 		code := r.URL.Query().Get("code")
 		fmt.Println(code)
 		length := len(json_data)
+		var data YourJson
 		for i := 0; i < length; i++ {
 			if json_data[i].Airport.Code == string(code) {
-
-				fmt.Println(json_data[i])
-				json.NewEncoder(w).Encode(json_data[i])
-
+				data = append(data, json_data[i])
 			}
 		}
+		json.NewEncoder(w).Encode(data)
 	})
 	http.ListenAndServe(":3000", nil)
 

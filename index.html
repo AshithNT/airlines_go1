@@ -30,15 +30,16 @@
         </div>
         </form>
 
-        <p class="h1 text-center">Airport</p>
+        <p class="h1 text-center" id="detail">Airport Details</p>
 
         <table class="table table-striped" id="TableAirport">
         </table>
+
     </div>
     <script>
 
         let table_load = () => {
-            $.get("http://localhost:3000/articles", function (data) {
+            $.get("http://localhost:3000/api", function (data) {
                 var text = '<thead><tr><th>Total Flights</th><th>Total Minutes Delayed</th><th>Time Label</th></tr></thead>'
                 let data1 = JSON.parse(data)
                 let data2 = data1.map(item => {
@@ -48,24 +49,31 @@
                 console.log(data1);
                 document.getElementById("TableAirport").innerHTML = text
                 $('#TableAirport').DataTable({
-                pagingType: 'full_numbers',
-            });
+                    pagingType: 'full_numbers',
+                    destroy: true,
+                });
             });
         }
         let fetch_code_filename = () => {
             let code = document.getElementById("code_filename").value
             let split_code = code.split("&")
-            $.get(`http://localhost:3000/code?code=${split_code[0]}&?filename=${split_code[1]}`, function (data) {
+
+            $.get(`http://localhost:3000/code?code=${split_code[0]}&filename=${split_code[1]}`, function (data) {
                 var text = ""
-                let data1 = JSON.parse(toString(data))
+                let data1 = JSON.parse(data)
                 let data2 = data1.map(item => {
                     text = text + `<tr><td>${item.Statistics.Flights.Total}</td><td>${item.Statistics.Minutes_Delayed.Total}</td><td>${item.Time.label}</td></tr>`
 
                 })
                 console.log(data1);
-                document.getElementById("data").innerHTML = text
+                document.getElementById("TableAirport").innerHTML = text
+                document.getElementById("detail").innerHTML = split_code[0]+','+data1[0].Airport.name
+                $('#TableAirport').DataTable({
+                    pagingType: 'full_numbers',
+                    destroy: true,
+                });
             });
-            alert(split_code)
+            alert(`Airport Code:${split_code[0]},filename:${split_code[1]}`)
         }
 
 
